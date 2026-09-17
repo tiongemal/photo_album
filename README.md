@@ -1,6 +1,6 @@
 # Photo Album API & React UI
 
-A full-stack photo album and media management application built with **FastAPI**, **React 18**, **SQLAlchemy**, **Tailwind CSS**, and **Pillow**.
+A full-stack photo album and media management application built with **FastAPI**, **React 18**, **SQLAlchemy**, **Tailwind CSS**, **Pillow**, and **pwdlib**.
 
 ---
 
@@ -11,6 +11,7 @@ A full-stack photo album and media management application built with **FastAPI**
 - **Drag-and-Drop Photo Upload**: Securely upload photos to specific albums with client-side preview and server-side format validation (`JPEG`, `PNG`, `WebP`).
 - **Metadata Extraction**: Automatically computes and displays image dimensions (width x height), original filename, MIME type, and file size.
 - **Lightbox Image Viewer**: View high-resolution photos in a fullscreen lightbox modal with technical metadata drawer.
+- **Security & Password Hashing**: Secure user password hashing using Argon2 (`pwdlib`) and JWT token utilities (`PyJWT`).
 - **Storage Isolation**: Stores media files in isolated disk storage using UUIDs to prevent filename collisions.
 - **Live Health Monitoring**: Real-time API connectivity status indicator between React frontend and FastAPI backend.
 
@@ -22,6 +23,7 @@ A full-stack photo album and media management application built with **FastAPI**
 - **Framework**: [FastAPI](https://fastapi.tiangolo.com/) (v0.141.1+)
 - **ORM & Database**: [SQLAlchemy](https://www.sqlalchemy.org/) (v2.0+) with SQLite
 - **Image Processing**: [Pillow](https://python-pillow.org/) (v12.3+)
+- **Security & Password Hashing**: [pwdlib](https://github.com/hynek/pwdlib) (Argon2) & [PyJWT](https://pyjwt.readthedocs.io/)
 - **Package Manager**: [uv](https://github.com/astral-sh/uv)
 - **ASGI Server**: [Uvicorn](https://www.uvicorn.org/)
 
@@ -50,6 +52,7 @@ A full-stack photo album and media management application built with **FastAPI**
 │   │   ├── photo.py         # Pydantic schemas for photos
 │   │   └── user.py          # Pydantic schemas for users
 │   ├── database.py          # SQLAlchemy engine & session maker
+│   ├── security.py          # Password hashing (Argon2 via pwdlib) & verification
 │   └── main.py              # FastAPI app initialization, CORS & endpoints
 ├── documentation/
 │   ├── api_reference.md     # Detailed API endpoint reference
@@ -70,7 +73,8 @@ A full-stack photo album and media management application built with **FastAPI**
 ├── storage/
 │   └── uploads/             # Directory where uploaded photo files are stored
 ├── tests/
-│   └── create_test_user.py  # Utility script to initialize a test user
+│   ├── create_test_user.py  # Utility script to initialize a test user
+│   └── pswd_hash.py         # Test script for Argon2 password hashing & verification
 ├── photo_album.db           # SQLite database file
 └── pyproject.toml           # Python dependency specifications
 ```

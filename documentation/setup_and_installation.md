@@ -89,13 +89,18 @@ uv run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
 ---
 
-## 🧪 Step 4: Running Automated Tests
+## 🧪 Step 4: Running Tests & Utilities
 
-Run the test suite using `pytest`:
+1. **Test Password Hashing**:
+   Verify Argon2 hashing and verification using `app/security.py`:
+   ```bash
+   uv run python tests/pswd_hash.py
+   ```
 
-```bash
-uv run pytest
-```
+2. **Run Pytest Suite**:
+   ```bash
+   uv run pytest
+   ```
 
 ---
 
