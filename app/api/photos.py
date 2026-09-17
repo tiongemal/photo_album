@@ -160,3 +160,4 @@ def delete_photo(
     return {
         'message': 'Photo deleted successfully'
     }
+

@@ -6,6 +6,8 @@ requires-python = ">=3.14"
 dependencies = [
     "fastapi>=0.141.1",
     "pillow>=12.3.0",
+    "pwdlib[argon2]>=0.3.1",
+    "pyjwt>=2.14.0",
     "python-multipart>=0.0.32",
     "sqlalchemy>=2.0.52",
     "uvicorn>=0.52.4",
