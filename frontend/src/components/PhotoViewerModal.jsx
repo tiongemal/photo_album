@@ -1,8 +1,11 @@
-import React from 'react';
-import { X, Download, FileText, Maximize2, HardDrive, Info } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Download, FileText, Maximize2, HardDrive, Info, Trash2, AlertTriangle } from 'lucide-react';
 import { getPhotoUrl } from '../services/api';
 
-export default function PhotoViewerModal({ photo, onClose }) {
+export default function PhotoViewerModal({ photo, onClose, onDeletePhoto }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   if (!photo) return null;
 
   const photoUrl = getPhotoUrl(photo.id);
@@ -13,6 +16,17 @@ export default function PhotoViewerModal({ photo, onClose }) {
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const handleDelete = async () => {
+    if (!onDeletePhoto) return;
+    try {
+      setDeleting(true);
+      await onDeletePhoto(photo.id);
+      onClose();
+    } catch (err) {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -100,7 +114,7 @@ export default function PhotoViewerModal({ photo, onClose }) {
             </div>
           </div>
 
-          <div className="pt-6">
+          <div className="pt-6 space-y-2.5">
             <a
               href={photoUrl}
               target="_blank"
@@ -111,6 +125,38 @@ export default function PhotoViewerModal({ photo, onClose }) {
               <Download className="w-4 h-4" />
               <span>Download Full Image</span>
             </a>
+
+            {confirmDelete ? (
+              <div className="p-3 bg-rose-950/40 border border-rose-500/30 rounded-xl space-y-2">
+                <p className="text-[11px] text-rose-300 font-medium flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-rose-400" />
+                  Delete photo permanently?
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="flex-1 bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white text-xs font-semibold py-1.5 rounded-lg transition"
+                  >
+                    {deleting ? 'Deleting...' : 'Yes, Delete'}
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium py-1.5 rounded-lg transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="w-full flex items-center justify-center gap-2 bg-slate-800/80 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-slate-700/60 hover:border-rose-500/30 font-medium text-xs py-2 px-4 rounded-xl transition"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Photo</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

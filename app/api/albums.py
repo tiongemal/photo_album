@@ -2,8 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+
 from app.models.album import Album
+from app.models.user import User
+
 from app.schemas.album import AlbumCreate, AlbumResponse
+from app.security import get_current_user
 
 
 router = APIRouter(
@@ -14,10 +18,11 @@ router = APIRouter(
 @router.post('/', response_model=AlbumResponse)
 def create_album(
         album: AlbumCreate,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)):
     new_album = Album(
         name=album.name,
-        owner_id = album.owner_id
+        owner_id = current_user.id
     )
 
     db.add(new_album)
@@ -27,9 +32,10 @@ def create_album(
     return new_album
 
 @router.get('/', response_model=list[AlbumResponse])
-def get_albums(db: Session = Depends(get_db)):
-    albums = db.query(Album).all()
-
+def get_albums(db: Session = Depends(get_db),
+               current_user: User = Depends(get_current_user)):
+    albums = db.query(Album).filter(Album.owner_id == current_user.id).all()
+    print('User_id: '+str(current_user.id))
     return albums
 
 

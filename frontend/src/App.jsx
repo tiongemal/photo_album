@@ -4,6 +4,7 @@ import AlbumList from './components/AlbumList';
 import AlbumDetail from './components/AlbumDetail';
 import PhotoUploadModal from './components/PhotoUploadModal';
 import PhotoViewerModal from './components/PhotoViewerModal';
+import AuthModal from './components/AuthModal';
 import Toast from './components/Toast';
 import {
   checkHealth,
@@ -11,6 +12,9 @@ import {
   createAlbum,
   deleteAlbum,
   uploadPhoto,
+  deletePhoto,
+  getStoredUsername,
+  removeToken,
 } from './services/api';
 
 export default function App() {
@@ -19,7 +23,8 @@ export default function App() {
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [ownerId, setOwnerId] = useState(1);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(getStoredUsername() || null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
@@ -37,9 +42,13 @@ export default function App() {
     try {
       setLoading(true);
       const data = await fetchAlbums();
-      setAlbums(data);
+      // Handle single album object vs list returned by API
+      setAlbums(Array.isArray(data) ? data : data ? [data] : []);
     } catch (err) {
-      showToast('Could not connect to FastAPI server', 'error');
+      if (currentUser) {
+        showToast(err.message || 'Could not fetch albums', 'error');
+      }
+      setAlbums([]);
     } finally {
       setLoading(false);
     }
@@ -47,15 +56,32 @@ export default function App() {
 
   useEffect(() => {
     checkServerHealth();
-    loadAlbums();
+    if (currentUser) {
+      loadAlbums();
+    } else {
+      setLoading(false);
+    }
 
     const interval = setInterval(checkServerHealth, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [currentUser]);
 
-  const handleCreateAlbum = async (name, ownerId) => {
+  const handleAuthSuccess = (username, message) => {
+    setCurrentUser(username);
+    showToast(message, 'success');
+  };
+
+  const handleLogout = () => {
+    removeToken();
+    setCurrentUser(null);
+    setAlbums([]);
+    setSelectedAlbum(null);
+    showToast('Signed out successfully', 'success');
+  };
+
+  const handleCreateAlbum = async (name) => {
     try {
-      const newAlbum = await createAlbum(name, ownerId);
+      const newAlbum = await createAlbum(name);
       setAlbums((prev) => [...prev, newAlbum]);
       showToast(`Album "${newAlbum.name}" created successfully!`);
     } catch (err) {
@@ -80,12 +106,24 @@ export default function App() {
     try {
       await uploadPhoto(albumId, file);
       showToast(`Photo "${file.name}" uploaded successfully!`);
-      // Trigger refresh if viewing current album
       if (selectedAlbum?.id === albumId) {
         setSelectedAlbum({ ...selectedAlbum });
       }
     } catch (err) {
       showToast(err.message || 'Failed to upload photo', 'error');
+      throw err;
+    }
+  };
+
+  const handleDeletePhoto = async (photoId) => {
+    try {
+      await deletePhoto(photoId);
+      showToast('Photo deleted successfully');
+      if (selectedAlbum) {
+        setSelectedAlbum({ ...selectedAlbum });
+      }
+    } catch (err) {
+      showToast(err.message || 'Failed to delete photo', 'error');
       throw err;
     }
   };
@@ -97,8 +135,9 @@ export default function App() {
         checkServerHealth={checkServerHealth}
         selectedAlbum={selectedAlbum}
         setSelectedAlbum={setSelectedAlbum}
-        ownerId={ownerId}
-        setOwnerId={setOwnerId}
+        currentUser={currentUser}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onLogout={handleLogout}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -113,7 +152,7 @@ export default function App() {
             <button
               onClick={() => {
                 checkServerHealth();
-                loadAlbums();
+                if (currentUser) loadAlbums();
               }}
               className="px-3 py-1.5 bg-rose-500 hover:bg-rose-400 text-white rounded-xl text-xs font-semibold transition"
             >
@@ -135,11 +174,20 @@ export default function App() {
             onSelectAlbum={(album) => setSelectedAlbum(album)}
             onCreateAlbum={handleCreateAlbum}
             onDeleteAlbum={handleDeleteAlbum}
-            ownerId={ownerId}
+            currentUser={currentUser}
+            onOpenAuthModal={() => setIsAuthModalOpen(true)}
             loading={loading}
           />
         )}
       </main>
+
+      {/* Auth Modal */}
+      {isAuthModalOpen && (
+        <AuthModal
+          onClose={() => setIsAuthModalOpen(false)}
+          onSuccess={handleAuthSuccess}
+        />
+      )}
 
       {/* Upload Modal */}
       {isUploadModalOpen && selectedAlbum && (
@@ -155,6 +203,7 @@ export default function App() {
         <PhotoViewerModal
           photo={selectedPhoto}
           onClose={() => setSelectedPhoto(null)}
+          onDeletePhoto={handleDeletePhoto}
         />
       )}
 

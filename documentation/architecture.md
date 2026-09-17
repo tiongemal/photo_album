@@ -47,7 +47,8 @@ graph TD
 - Uses **Pydantic** models to validate incoming HTTP request payloads and structure outgoing JSON responses.
 - Enforces data types and `from_attributes = True` compatibility for SQLAlchemy ORM conversion.
 
-### 3. Business & Processing Layer
+### 3. Business & Security Layer (`app/security.py`)
+- **Password Hashing**: Uses `pwdlib` with Argon2 (`PasswordHash.recommended()`) for secure password hashing (`hash_password`) and verification (`verify_password`).
 - **Pillow (`PIL.Image`) Integration**: Validates image binary contents to prevent corrupted uploads or file spoofing. Reads image dimensions (`width` and `height`) dynamically.
 - **UUID File Generator**: Generates cryptographically secure, unique filenames using Python `uuid4` to prevent file collisions and directory traversal attacks.
 

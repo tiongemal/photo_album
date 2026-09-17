@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { FolderPlus, Folder, Trash2, Image as ImageIcon, ArrowRight, User } from 'lucide-react';
+import { FolderPlus, Folder, Trash2, Image as ImageIcon, ArrowRight, User, LogIn } from 'lucide-react';
 
 export default function AlbumList({
   albums,
   onSelectAlbum,
   onCreateAlbum,
   onDeleteAlbum,
-  ownerId,
+  currentUser,
+  onOpenAuthModal,
   loading,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,13 +19,16 @@ export default function AlbumList({
     if (!newAlbumName.trim()) return;
     try {
       setCreating(true);
-      await onCreateAlbum(newAlbumName, ownerId);
+      await onCreateAlbum(newAlbumName);
       setNewAlbumName('');
       setIsModalOpen(false);
     } finally {
       setCreating(false);
     }
   };
+
+  // Ensure albums is always an array (handling edge cases from API)
+  const albumArray = Array.isArray(albums) ? albums : albums ? [albums] : [];
 
   return (
     <div className="space-y-6">
@@ -37,7 +41,13 @@ export default function AlbumList({
           </p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            if (!currentUser) {
+              onOpenAuthModal();
+            } else {
+              setIsModalOpen(true);
+            }
+          }}
           className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-medium text-sm px-4 py-2.5 rounded-xl shadow-lg shadow-sky-500/25 transition active:scale-95"
         >
           <FolderPlus className="w-4 h-4" />
@@ -55,7 +65,24 @@ export default function AlbumList({
             />
           ))}
         </div>
-      ) : albums.length === 0 ? (
+      ) : !currentUser ? (
+        <div className="text-center py-16 px-4 bg-slate-800/20 border border-dashed border-slate-800 rounded-3xl">
+          <div className="w-16 h-16 rounded-2xl bg-sky-500/10 text-sky-400 flex items-center justify-center mx-auto mb-4 border border-sky-500/20">
+            <LogIn className="w-8 h-8 opacity-80" />
+          </div>
+          <h3 className="text-lg font-semibold text-white">Sign In Required</h3>
+          <p className="text-sm text-slate-400 max-w-sm mx-auto mt-1 mb-6">
+            Please sign in or create an account to view and manage your photo albums.
+          </p>
+          <button
+            onClick={onOpenAuthModal}
+            className="inline-flex items-center gap-2 bg-sky-500 hover:bg-sky-400 text-white font-medium text-sm px-4 py-2.5 rounded-xl transition shadow-lg shadow-sky-500/20"
+          >
+            <LogIn className="w-4 h-4" />
+            <span>Sign In to Access Albums</span>
+          </button>
+        </div>
+      ) : albumArray.length === 0 ? (
         <div className="text-center py-16 px-4 bg-slate-800/20 border border-dashed border-slate-800 rounded-3xl">
           <div className="w-16 h-16 rounded-2xl bg-slate-800/80 text-slate-400 flex items-center justify-center mx-auto mb-4 border border-slate-700/50">
             <Folder className="w-8 h-8 opacity-60" />
@@ -74,7 +101,7 @@ export default function AlbumList({
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {albums.map((album) => (
+          {albumArray.map((album) => (
             <div
               key={album.id}
               className="group relative bg-slate-800/40 hover:bg-slate-800/80 border border-slate-800 hover:border-slate-700/80 rounded-2xl p-5 transition duration-300 flex flex-col justify-between hover:shadow-xl hover:shadow-sky-500/5"
@@ -156,18 +183,6 @@ export default function AlbumList({
                   value={newAlbumName}
                   onChange={(e) => setNewAlbumName(e.target.value)}
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Owner ID
-                </label>
-                <input
-                  type="number"
-                  disabled
-                  value={ownerId}
-                  className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-400"
                 />
               </div>
 

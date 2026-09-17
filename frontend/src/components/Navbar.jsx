@@ -1,13 +1,14 @@
 import React from 'react';
-import { Camera, Layers, UserCheck, RefreshCw, ArrowLeft } from 'lucide-react';
+import { RefreshCw, ArrowLeft, LogIn, LogOut, User } from 'lucide-react';
 
 export default function Navbar({
   isOnline,
   checkServerHealth,
   selectedAlbum,
   setSelectedAlbum,
-  ownerId,
-  setOwnerId,
+  currentUser,
+  onOpenAuthModal,
+  onLogout,
 }) {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md">
@@ -23,30 +24,46 @@ export default function Navbar({
             </button>
           ) : (
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedAlbum(null)}>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20">
-                <Camera className="w-6 h-6 text-white" />
-              </div>
+              <img
+                src="/logo.jpg"
+                alt="PhotoVault Logo"
+                className="w-10 h-10 rounded-xl object-cover shadow-lg shadow-sky-500/20 border border-sky-500/30 hover:scale-105 transition"
+              />
               <div>
-                <h1 className="text-lg font-bold text-white leading-tight">PhotoVault</h1>
+                <h1 className="text-lg font-bold text-white leading-tight flex items-center gap-1.5">
+                  PhotoVault
+                </h1>
                 <p className="text-xs text-slate-400">FastAPI & React Media Manager</p>
               </div>
             </div>
           )}
         </div>
 
-        <div className="flex items-center gap-4">
-          {/* Owner Selector */}
-          <div className="flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 rounded-lg px-3 py-1.5">
-            <UserCheck className="w-4 h-4 text-sky-400" />
-            <span className="text-xs text-slate-400 font-medium hidden sm:inline">Owner ID:</span>
-            <input
-              type="number"
-              min="1"
-              value={ownerId}
-              onChange={(e) => setOwnerId(e.target.value)}
-              className="w-12 bg-slate-900 text-xs font-semibold text-sky-400 text-center rounded border border-slate-700 py-0.5 focus:outline-none focus:border-sky-500"
-            />
-          </div>
+        <div className="flex items-center gap-3 sm:gap-4">
+          {/* User Auth Section */}
+          {currentUser ? (
+            <div className="flex items-center gap-2 bg-slate-800/80 border border-slate-700/80 rounded-lg px-3 py-1.5">
+              <User className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-semibold text-white truncate max-w-[100px]">
+                {currentUser}
+              </span>
+              <button
+                onClick={onLogout}
+                title="Sign Out"
+                className="ml-1 text-slate-400 hover:text-rose-400 transition"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onOpenAuthModal}
+              className="flex items-center gap-1.5 text-xs font-semibold text-white bg-sky-500 hover:bg-sky-400 px-3 py-1.5 rounded-lg transition shadow-md shadow-sky-500/20"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </button>
+          )}
 
           {/* Health status badge */}
           <button
