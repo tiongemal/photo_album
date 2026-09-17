@@ -9,7 +9,6 @@ from fastapi import (
 from fastapi.responses import FileResponse
 
 from PIL import Image
-from multipart import file_path
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -134,3 +133,30 @@ def get_photo(
         path=file_path, media_type=photo.mime_type,
         filename=photo.original_filename
     )
+
+@photo_router.delete('/{photo_id}')
+def delete_photo(
+        photo_id: int,
+        db: Session = Depends(get_db)
+):
+    photo = db.query(Photo).filter(
+        Photo.id == photo_id
+    ).first()
+
+    if photo is None:
+        raise HTTPException(
+            status_code=404,
+            detail='photo not found'
+        )
+
+    file_path = UPLOAD_DIR/ photo.stored_filename
+
+    if file_path.exists():
+        file_path.unlink()
+
+    db.delete(photo)
+    db.commit()
+
+    return {
+        'message': 'Photo deleted successfully'
+    }

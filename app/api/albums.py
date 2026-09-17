@@ -33,11 +33,11 @@ def get_albums(db: Session = Depends(get_db)):
     return albums
 
 
-@router.get('/{album_id}', response_model=list[AlbumResponse])
+@router.get('/{album_id}', response_model=AlbumResponse)
 def get_album(album_id:int, db: Session = Depends(get_db)):
     album = db.query(Album).filter(Album.id == album_id).first()
 
-    if album in None:
+    if album is None:
         raise  HTTPException(
             status_code=404,
             detail='Album not found'
@@ -45,7 +45,7 @@ def get_album(album_id:int, db: Session = Depends(get_db)):
 
     return album
 
-@router.delete('/{album_id')
+@router.delete('/{album_id}')
 def delete_album(
         album_id: int,
         db: Session = Depends(get_db)

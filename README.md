@@ -1,25 +1,34 @@
-# Photo Album API
+# Photo Album API & React UI
 
-A modern, lightweight RESTful API built with **FastAPI**, **SQLAlchemy**, and **Pillow** for managing photo albums and uploading, validating, and serving image files.
+A full-stack photo album and media management application built with **FastAPI**, **React 18**, **SQLAlchemy**, **Tailwind CSS**, and **Pillow**.
+
+---
 
 ## 🚀 Features
 
+- **React Web Dashboard**: Sleek, modern glassmorphism UI for browsing photo albums, uploading images, and viewing image metadata.
 - **Album Management**: Create, view, list, and delete photo albums linked to users.
-- **Photo Upload & Validation**: Securely upload photos to specific albums with automatic format validation (`JPEG`, `PNG`, `WebP`) and PIL-based image integrity checks.
-- **Image Metadata Extraction**: Automatically computes and stores image dimensions (width, height), original file name, MIME type, and file size.
-- **Media File Serving**: Stream and serve uploaded images directly via FastAPI file responses.
+- **Drag-and-Drop Photo Upload**: Securely upload photos to specific albums with client-side preview and server-side format validation (`JPEG`, `PNG`, `WebP`).
+- **Metadata Extraction**: Automatically computes and displays image dimensions (width x height), original filename, MIME type, and file size.
+- **Lightbox Image Viewer**: View high-resolution photos in a fullscreen lightbox modal with technical metadata drawer.
 - **Storage Isolation**: Stores media files in isolated disk storage using UUIDs to prevent filename collisions.
-- **SQLite Database**: Persistent relational database powered by SQLAlchemy ORM.
+- **Live Health Monitoring**: Real-time API connectivity status indicator between React frontend and FastAPI backend.
 
 ---
 
 ## 🛠️ Tech Stack
 
+### Backend
 - **Framework**: [FastAPI](https://fastapi.tiangolo.com/) (v0.141.1+)
 - **ORM & Database**: [SQLAlchemy](https://www.sqlalchemy.org/) (v2.0+) with SQLite
 - **Image Processing**: [Pillow](https://python-pillow.org/) (v12.3+)
 - **Package Manager**: [uv](https://github.com/astral-sh/uv)
 - **ASGI Server**: [Uvicorn](https://www.uvicorn.org/)
+
+### Frontend
+- **Framework**: [React 18](https://react.dev/) + [Vite 6](https://vite.dev/)
+- **Styling**: [Tailwind CSS v3](https://tailwindcss.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
 
 ---
 
@@ -40,84 +49,81 @@ A modern, lightweight RESTful API built with **FastAPI**, **SQLAlchemy**, and **
 │   │   ├── album.py         # Pydantic schemas for albums
 │   │   ├── photo.py         # Pydantic schemas for photos
 │   │   └── user.py          # Pydantic schemas for users
-│   ├── services/
-│   │   ├── auth.py          # Auth service layer placeholder
-│   │   └── storage.py       # Storage service layer placeholder
-│   ├── database.py          # SQLAlchemy engine, session maker & Base
-│   └── main.py              # FastAPI application initialization & routes
+│   ├── database.py          # SQLAlchemy engine & session maker
+│   └── main.py              # FastAPI app initialization, CORS & endpoints
 ├── documentation/
 │   ├── api_reference.md     # Detailed API endpoint reference
 │   ├── architecture.md      # Architectural overview & storage pipeline
 │   ├── database_schema.md   # Database tables, relations & schema layout
+│   ├── frontend_ui.md       # React frontend architecture & user flows
 │   └── setup_and_installation.md # Comprehensive setup & development guide
+├── frontend/
+│   ├── src/
+│   │   ├── components/      # Navbar, AlbumList, AlbumDetail, Modals, Toast
+│   │   ├── services/api.js  # FastAPI HTTP client wrapper
+│   │   ├── App.jsx          # Top-level view routing & state management
+│   │   ├── index.css        # Tailwind CSS directives & custom styles
+│   │   └── main.jsx         # React application entrypoint
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
 ├── storage/
 │   └── uploads/             # Directory where uploaded photo files are stored
 ├── tests/
 │   └── create_test_user.py  # Utility script to initialize a test user
 ├── photo_album.db           # SQLite database file
-├── pyproject.toml           # Dependency specifications & project metadata
-└── uv.lock                  # Lockfile for reproducible builds
+└── pyproject.toml           # Python dependency specifications
 ```
 
 ---
 
 ## 🚦 Quick Start Guide
 
-### Prerequisites
+### 1. Start the FastAPI Backend
 
-- **Python**: `3.14` or higher (compatible with `3.10+`)
-- **uv**: Installed (`pip install uv` or official installation script)
-
-### Setup & Run
-
-1. **Clone the repository and enter the directory**:
-   ```bash
-   cd PythonProject6
-   ```
-
-2. **Install dependencies**:
+1. **Install Python dependencies**:
    ```bash
    uv sync
    ```
 
-3. **Initialize Test Data (Optional)**:
-   Create a default test user to own photo albums:
+2. **Initialize Test User**:
    ```bash
    uv run python tests/create_test_user.py
    ```
 
-4. **Start the FastAPI Development Server**:
+3. **Run Uvicorn Server**:
    ```bash
-   uv run uvicorn app.main:app --reload
+   uv run uvicorn app.main:app --reload --port 8000
    ```
-
-5. **Access Interactive API Docs**:
-   Open your browser and navigate to:
-   - **Swagger UI**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-   - **ReDoc**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+   - API Docs: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 ---
 
-## 📡 API Overview
+### 2. Start the React Frontend
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/` | Root health check message |
-| `GET` | `/health` | Server health status |
-| `POST` | `/albums/` | Create a new photo album |
-| `GET` | `/albums/` | List all albums |
-| `GET` | `/albums/{album_id}` | Retrieve album details by ID |
-| `DELETE` | `/albums/{album_id}` | Delete an album and its photos |
-| `POST` | `/albums/{album_id}/photos` | Upload a photo file to an album |
-| `GET` | `/albums/{album_id}/photos` | List all photos in an album |
-| `GET` | `/photos/{photo_id}` | Stream / download photo media by ID |
+1. **Navigate to `frontend/` directory**:
+   ```bash
+   cd frontend
+   ```
+
+2. **Install Node dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Start Vite Dev Server**:
+   ```bash
+   npm run dev
+   ```
+   - React UI: [http://localhost:3000](http://localhost:3000)
 
 ---
 
 ## 📚 Documentation Index
 
-For complete and detailed technical documentation, explore the files in the [`documentation/`](file:///c:/Users/user1/PycharmProjects/PythonProject6/documentation) folder:
+Check the [`documentation/`](file:///c:/Users/user1/PycharmProjects/PythonProject6/documentation) folder for full guides:
 
+- 💻 [**React UI Guide**](file:///c:/Users/user1/PycharmProjects/PythonProject6/documentation/frontend_ui.md) — Frontend component structure, state management, and user flows.
 - 🏗️ [**Architecture & System Design**](file:///c:/Users/user1/PycharmProjects/PythonProject6/documentation/architecture.md) — System layer breakdown, request execution flows, and storage isolation.
 - 📖 [**API Reference**](file:///c:/Users/user1/PycharmProjects/PythonProject6/documentation/api_reference.md) — Detailed REST specification, HTTP status codes, request bodies, and JSON schemas.
 - 🗄️ [**Database Schema**](file:///c:/Users/user1/PycharmProjects/PythonProject6/documentation/database_schema.md) — ER diagrams, column specifications, foreign key relations, and cascades.
